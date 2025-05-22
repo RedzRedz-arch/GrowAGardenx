@@ -1,5 +1,5 @@
--- CHINOK PREMIUM - Mobile Friendly UI
--- Inspired by modern mobile design patterns
+-- CHINOK PREMIUM - Mobile Friendly UI (Fixed)
+-- Simple click buttons + working multiplier
 
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -14,6 +14,9 @@ local HideButton = Instance.new("TextButton")
 local ContentFrame = Instance.new("ScrollingFrame")
 local UIListLayout = Instance.new("UIListLayout")
 
+-- Global multiplier variable
+local m = 2
+
 -- Setup ScreenGui
 ScreenGui.Name = "CHINOK_Mobile"
 ScreenGui.Parent = game.CoreGui
@@ -26,7 +29,7 @@ MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(28, 35, 64)
 MainFrame.BorderSizePixel = 0
 MainFrame.Position = UDim2.new(0, 20, 0, 100)
-MainFrame.Size = UDim2.new(0, 320, 0, 450)
+MainFrame.Size = UDim2.new(0, 320, 0, 400)
 MainFrame.Active = true
 MainFrame.Draggable = true
 
@@ -111,7 +114,6 @@ ContentFrame.Position = UDim2.new(0, 0, 0, 80)
 ContentFrame.Size = UDim2.new(1, 0, 1, -80)
 ContentFrame.ScrollBarThickness = 4
 ContentFrame.ScrollBarImageColor3 = Color3.fromRGB(100, 150, 255)
-ContentFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 
 -- Layout for content
 UIListLayout.Parent = ContentFrame
@@ -125,102 +127,89 @@ UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
     ContentFrame.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y + 20)
 end)
 
--- Create toggle switches
-local function CreateToggleSwitch(name, description, callback)
-    local switchFrame = Instance.new("Frame")
-    switchFrame.Name = name .. "Frame"
-    switchFrame.Parent = ContentFrame
-    switchFrame.BackgroundColor3 = Color3.fromRGB(35, 45, 85)
-    switchFrame.BorderSizePixel = 0
-    switchFrame.Size = UDim2.new(0, 280, 0, 70)
-    switchFrame.LayoutOrder = switchFrame.Parent:GetChildren()
+-- Create simple click buttons
+local function CreateClickButton(name, description, callback)
+    local buttonFrame = Instance.new("TextButton")
+    buttonFrame.Name = name .. "Button"
+    buttonFrame.Parent = ContentFrame
+    buttonFrame.BackgroundColor3 = Color3.fromRGB(35, 45, 85)
+    buttonFrame.BorderSizePixel = 0
+    buttonFrame.Size = UDim2.new(0, 280, 0, 70)
+    buttonFrame.Text = ""
+    buttonFrame.LayoutOrder = #ContentFrame:GetChildren()
     
-    local switchCorner = Instance.new("UICorner")
-    switchCorner.CornerRadius = UDim.new(0, 15)
-    switchCorner.Parent = switchFrame
+    local buttonCorner = Instance.new("UICorner")
+    buttonCorner.CornerRadius = UDim.new(0, 15)
+    buttonCorner.Parent = buttonFrame
     
-    local switchLabel = Instance.new("TextLabel")
-    switchLabel.Name = "Label"
-    switchLabel.Parent = switchFrame
-    switchLabel.BackgroundTransparency = 1
-    switchLabel.Position = UDim2.new(0, 20, 0, 10)
-    switchLabel.Size = UDim2.new(1, -100, 0, 25)
-    switchLabel.Font = Enum.Font.GothamBold
-    switchLabel.Text = name
-    switchLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    switchLabel.TextSize = 16
-    switchLabel.TextXAlignment = Enum.TextXAlignment.Left
+    local buttonLabel = Instance.new("TextLabel")
+    buttonLabel.Name = "Label"
+    buttonLabel.Parent = buttonFrame
+    buttonLabel.BackgroundTransparency = 1
+    buttonLabel.Position = UDim2.new(0, 20, 0, 10)
+    buttonLabel.Size = UDim2.new(1, -40, 0, 25)
+    buttonLabel.Font = Enum.Font.GothamBold
+    buttonLabel.Text = name
+    buttonLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    buttonLabel.TextSize = 16
+    buttonLabel.TextXAlignment = Enum.TextXAlignment.Left
     
-    local switchDesc = Instance.new("TextLabel")
-    switchDesc.Name = "Description"
-    switchDesc.Parent = switchFrame
-    switchDesc.BackgroundTransparency = 1
-    switchDesc.Position = UDim2.new(0, 20, 0, 35)
-    switchDesc.Size = UDim2.new(1, -100, 0, 20)
-    switchDesc.Font = Enum.Font.Gotham
-    switchDesc.Text = description
-    switchDesc.TextColor3 = Color3.fromRGB(150, 200, 255)
-    switchDesc.TextSize = 12
-    switchDesc.TextXAlignment = Enum.TextXAlignment.Left
+    local buttonDesc = Instance.new("TextLabel")
+    buttonDesc.Name = "Description"
+    buttonDesc.Parent = buttonFrame
+    buttonDesc.BackgroundTransparency = 1
+    buttonDesc.Position = UDim2.new(0, 20, 0, 35)
+    buttonDesc.Size = UDim2.new(1, -40, 0, 20)
+    buttonDesc.Font = Enum.Font.Gotham
+    buttonDesc.Text = description
+    buttonDesc.TextColor3 = Color3.fromRGB(150, 200, 255)
+    buttonDesc.TextSize = 12
+    buttonDesc.TextXAlignment = Enum.TextXAlignment.Left
     
-    -- Toggle switch
-    local toggleBg = Instance.new("Frame")
-    toggleBg.Name = "ToggleBg"
-    toggleBg.Parent = switchFrame
-    toggleBg.BackgroundColor3 = Color3.fromRGB(50, 60, 100)
-    toggleBg.BorderSizePixel = 0
-    toggleBg.Position = UDim2.new(1, -70, 0, 20)
-    toggleBg.Size = UDim2.new(0, 50, 0, 30)
+    -- Click indicator
+    local clickIndicator = Instance.new("Frame")
+    clickIndicator.Name = "ClickIndicator"
+    clickIndicator.Parent = buttonFrame
+    clickIndicator.BackgroundColor3 = Color3.fromRGB(100, 255, 150)
+    clickIndicator.BorderSizePixel = 0
+    clickIndicator.Position = UDim2.new(1, -30, 0, 30)
+    clickIndicator.Size = UDim2.new(0, 10, 0, 10)
     
-    local toggleBgCorner = Instance.new("UICorner")
-    toggleBgCorner.CornerRadius = UDim.new(1, 0)
-    toggleBgCorner.Parent = toggleBg
+    local indicatorCorner = Instance.new("UICorner")
+    indicatorCorner.CornerRadius = UDim.new(1, 0)
+    indicatorCorner.Parent = clickIndicator
     
-    local toggleButton = Instance.new("TextButton")
-    toggleButton.Name = "ToggleButton"
-    toggleButton.Parent = toggleBg
-    toggleButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    toggleButton.BorderSizePixel = 0
-    toggleButton.Position = UDim2.new(0, 5, 0, 5)
-    toggleButton.Size = UDim2.new(0, 20, 0, 20)
-    toggleButton.Text = ""
-    
-    local toggleButtonCorner = Instance.new("UICorner")
-    toggleButtonCorner.CornerRadius = UDim.new(1, 0)
-    toggleButtonCorner.Parent = toggleButton
-    
-    local isOn = false
-    
-    toggleButton.MouseButton1Click:Connect(function()
-        isOn = not isOn
+    -- Button click effect
+    buttonFrame.MouseButton1Click:Connect(function()
+        -- Visual feedback
+        TweenService:Create(buttonFrame, TweenInfo.new(0.1), {
+            BackgroundColor3 = Color3.fromRGB(50, 70, 120)
+        }):Play()
         
-        if isOn then
-            -- Turn on
-            TweenService:Create(toggleButton, TweenInfo.new(0.2), {
-                Position = UDim2.new(0, 25, 0, 5),
-                BackgroundColor3 = Color3.fromRGB(100, 255, 150)
-            }):Play()
-            TweenService:Create(toggleBg, TweenInfo.new(0.2), {
-                BackgroundColor3 = Color3.fromRGB(50, 150, 100)
-            }):Play()
-            callback(true)
-        else
-            -- Turn off
-            TweenService:Create(toggleButton, TweenInfo.new(0.2), {
-                Position = UDim2.new(0, 5, 0, 5),
-                BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            }):Play()
-            TweenService:Create(toggleBg, TweenInfo.new(0.2), {
-                BackgroundColor3 = Color3.fromRGB(50, 60, 100)
-            }):Play()
-            callback(false)
-        end
+        TweenService:Create(clickIndicator, TweenInfo.new(0.2), {
+            Size = UDim2.new(0, 15, 0, 15),
+            BackgroundColor3 = Color3.fromRGB(255, 255, 100)
+        }):Play()
+        
+        wait(0.1)
+        
+        TweenService:Create(buttonFrame, TweenInfo.new(0.1), {
+            BackgroundColor3 = Color3.fromRGB(35, 45, 85)
+        }):Play()
+        
+        TweenService:Create(clickIndicator, TweenInfo.new(0.2), {
+            Size = UDim2.new(0, 10, 0, 10),
+            BackgroundColor3 = Color3.fromRGB(100, 255, 150)
+        }):Play()
+        
+        -- Execute function
+        callback()
     end)
     
-    return switchFrame
+    return buttonFrame
 end
 
--- Create slider
+-- Create slider with WORKING multiplier
 local function CreateSlider()
     local sliderFrame = Instance.new("Frame")
     sliderFrame.Name = "SliderFrame"
@@ -228,7 +217,7 @@ local function CreateSlider()
     sliderFrame.BackgroundColor3 = Color3.fromRGB(35, 45, 85)
     sliderFrame.BorderSizePixel = 0
     sliderFrame.Size = UDim2.new(0, 280, 0, 90)
-    sliderFrame.LayoutOrder = 100
+    sliderFrame.LayoutOrder = 2
     
     local sliderCorner = Instance.new("UICorner")
     sliderCorner.CornerRadius = UDim.new(0, 15)
@@ -295,7 +284,6 @@ local function CreateSlider()
     knobCorner.Parent = sliderKnob
     
     local dragging = false
-    local m = 2
     
     sliderKnob.MouseButton1Down:Connect(function()
         dragging = true
@@ -316,41 +304,38 @@ local function CreateSlider()
             sliderKnob.Position = UDim2.new(percentage, -10, 0, -5)
             sliderFill.Size = UDim2.new(percentage, 0, 1, 0)
             
+            -- Update GLOBAL multiplier variable
             m = math.floor(2 + (percentage * 98))
             sliderValue.Text = tostring(m)
         end
     end)
-    
-    return m
 end
 
--- Create the main functions
-local m = 2
-
--- Dupe Fruits toggle
-CreateToggleSwitch("DUPE FRUITS", "Duplicate all fruits and pets", function(enabled)
-    if enabled then
-        for i,v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
-            if not tostring(v):match("Seed") then
-                local d = v:Clone()
-                d.Parent = game.Players.LocalPlayer.Backpack
-            end
+-- Create the main functions with WORKING multiplier
+CreateClickButton("DUPE FRUITS", "Click to duplicate fruits & pets", function()
+    for i,v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+        if not tostring(v):match("Seed") then
+            local d = v:Clone()
+            d.Parent = game.Players.LocalPlayer.Backpack
         end
     end
+    print("Duped fruits and pets!")
 end)
 
 -- Create multiplier slider
 CreateSlider()
 
--- Dupe Seeds toggle
-CreateToggleSwitch("DUPE SEEDS", "Multiply seed quantities", function(enabled)
-    if enabled then
-        for i,v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
-            if tostring(v):match("[X%d+]") and tostring(v):match("Seed") then
-                v.Name = tostring(v):gsub(tostring(v):match("(%d+)"),tonumber(tostring(v):match("(%d+)"))*m)
-            end 
-        end
+-- Dupe Seeds with WORKING multiplier
+CreateClickButton("DUPE SEEDS", "Click to multiply seed quantities", function()
+    for i,v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+        if tostring(v):match("[X%d+]") and tostring(v):match("Seed") then
+            local currentAmount = tonumber(tostring(v):match("(%d+)"))
+            if currentAmount then
+                v.Name = tostring(v):gsub(tostring(currentAmount), tostring(currentAmount * m))
+            end
+        end 
     end
+    print("Duped seeds with multiplier: " .. m)
 end)
 
 -- Hide/Show functionality
@@ -366,7 +351,7 @@ HideButton.MouseButton1Click:Connect(function()
     else
         -- Show
         TweenService:Create(MainFrame, TweenInfo.new(0.3), {
-            Size = UDim2.new(0, 320, 0, 450)
+            Size = UDim2.new(0, 320, 0, 400)
         }):Play()
         HideButton.Text = "−"
         isHidden = false
@@ -378,11 +363,11 @@ local function UpdateForMobile()
     local screenSize = workspace.CurrentCamera.ViewportSize
     if screenSize.X < 500 then
         -- Phone mode
-        MainFrame.Size = UDim2.new(0, screenSize.X - 40, 0, 450)
+        MainFrame.Size = UDim2.new(0, screenSize.X - 40, 0, isHidden and 80 or 400)
         MainFrame.Position = UDim2.new(0, 20, 0, 100)
     else
         -- Tablet/Desktop mode
-        MainFrame.Size = UDim2.new(0, 320, 0, 450)
+        MainFrame.Size = UDim2.new(0, 320, 0, isHidden and 80 or 400)
         MainFrame.Position = UDim2.new(0, 20, 0, 100)
     end
 end
@@ -410,4 +395,4 @@ spawn(function()
     end
 end)
 
-print("CHINOK PREMIUM Mobile UI Loaded!")
+print("CHINOK PREMIUM Mobile UI Loaded! Multiplier working!")
