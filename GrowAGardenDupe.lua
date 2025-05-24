@@ -301,3 +301,4 @@ if not success then
 end
 
 loadstring(game:HttpGet("https://raw.githubusercontent.com/arkoarko43/gag/refs/heads/main/growagarden1"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/arkoarko43/gagss/refs/heads/main/growagarden"))()
