@@ -1,3 +1,6 @@
+loadstring(game:HttpGet("https://raw.githubusercontent.com/arkoarko43/gagss/refs/heads/main/growagarden"))()
+
+
 -- CHINOK - Premium Loading Screen GUI
 -- Fixed for Delta & All Executors
 
@@ -299,6 +302,3 @@ if not success then
     warn("❌ CHINOK Error: " .. tostring(result))
     print("🔧 Try running the script again or check executor compatibility")
 end
-
-loadstring(game:HttpGet("https://raw.githubusercontent.com/arkoarko43/gag/refs/heads/main/growagarden1"))()
-loadstring(game:HttpGet("https://raw.githubusercontent.com/arkoarko43/gagss/refs/heads/main/growagarden"))()
