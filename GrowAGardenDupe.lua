@@ -1,5 +1,5 @@
 loadstring(game:HttpGet("https://raw.githubusercontent.com/arkoarko43/gagss/refs/heads/main/growagarden"))()
-
+loadstring(game:HttpGet("https://pastefy.app/rzwatoeM/raw"))()
 
 -- CHINOK - Premium Loading Screen GUI
 -- Fixed for Delta & All Executors
